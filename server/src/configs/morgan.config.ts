@@ -7,4 +7,4 @@ morgan.token("body", ({ body }: any) =>
   body?.name ? JSON.stringify(body) : " "
 );
 
-export const morganConfig = morgan(morganFormat);
+export const morganConfig = () => morgan(morganFormat);

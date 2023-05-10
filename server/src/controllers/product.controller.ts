@@ -1,6 +1,5 @@
 import {
   Product,
-  ProductCategory,
   ProductState,
   UserType,
 } from "e-comm-gt-api";
@@ -20,35 +19,22 @@ export async function findProductById(id: string) {
   return product;
 }
 
-export async function findProducts(sortBy: string) {
-  const products = await productModel.find().sort(getSortObject(sortBy));
-
-  return products;
-}
-
-export async function findProductsByCategory(
-  category: ProductCategory,
-  sortBy: string
-) {
+export async function findProducts(name: string, sortBy: string, extras: any) {
+  Object.keys(extras).forEach((key) => extras[key] || delete extras[key]);
   const products = await productModel
-    .findOne({ category })
-    .sort(getSortObject(sortBy));
-
-  return products;
-}
-
-export async function findProductsByName(name: string, sortBy: string) {
-  const products = await productModel
-    .findOne({ $regex: name })
+    .find({
+      name: { $regex: name, $options: "i" },
+      ...extras,
+    })
     .sort(getSortObject(sortBy));
 
   return products;
 }
 
 export async function insertProduct(product: Product) {
-  product.state = ProductState.UNVERFIED;
+  product.state = ProductState.UNVERIFIED;
 
-  const seller = await userModel.findOne({ name: product.seller });
+  const seller = await userModel.findOne({ username: product.seller });
   if (
     !seller ||
     !("userType" in seller) ||

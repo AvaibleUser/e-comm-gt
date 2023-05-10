@@ -1,5 +1,17 @@
-import { User, UserType } from "e-comm-gt-api";
+import { Card, User, UserType } from "e-comm-gt-api";
 import { userModel } from "../models/user.model";
+
+export async function getUser(username: string) {
+  const user = await userModel.findOne({ username });
+
+  return user;
+}
+
+export async function getAllUsae() {
+  const users = await userModel.find({ userType: { $ne: "seller" } });
+
+  return users;
+}
 
 export async function login(username: string, password: string) {
   const userSaved = await userModel.findOne({ username });
@@ -7,9 +19,9 @@ export async function login(username: string, password: string) {
   if (userSaved?.password === password) {
     const user: any = userSaved.toObject();
     delete user.password;
-    delete user.creditCards;
     return user;
   }
+
   throw new Error("The username or password is incorrect.");
 }
 
@@ -44,6 +56,16 @@ export async function updateEmployee(user: User, admin: User) {
   const userUpdated = await userModel.updateOne(
     { username: user.username },
     user,
+    { new: true }
+  );
+
+  return userUpdated;
+}
+
+export async function addCard(username: string, card: Card) {
+  const userUpdated = await userModel.findOneAndUpdate(
+    { username, userType: UserType.SELLER },
+    { $push: { creditCards: { ...card } } },
     { new: true }
   );
 

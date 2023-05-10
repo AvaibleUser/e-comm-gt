@@ -1,6 +1,9 @@
-import { User } from "e-comm-gt-api";
+import { Card, User } from "e-comm-gt-api";
 import express, { Request, Response, Router } from "express";
 import {
+  addCard,
+  getAllUsae,
+  getUser,
   login,
   registerEmployee,
   signUp,
@@ -9,8 +12,21 @@ import {
 
 export const userRoute: Router = express.Router();
 
+userRoute.get("/:username", async (req: Request, res: Response) => {
+  const { username } = req.params;
+  const user = await getUser(username);
+
+  return res.json(user);
+});
+
+userRoute.get("", async (req: Request, res: Response) => {
+  const users = await getAllUsae();
+
+  return res.json(users);
+});
+
 userRoute.post("/login", async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body || {};
 
   if (!username || !password) {
     return res.status(400).send("To login you must send username and password");
@@ -26,9 +42,9 @@ userRoute.post("/login", async (req: Request, res: Response) => {
 });
 
 userRoute.post("/seller", async (req: Request, res: Response) => {
-  const user: User = req.body;
+  const user: User = req.body || {};
 
-  if (!user.username || !user.password) {
+  if (!user || !user.username || !user.password) {
     return res
       .status(400)
       .send("To create an user you must send username and password");
@@ -44,7 +60,7 @@ userRoute.post("/seller", async (req: Request, res: Response) => {
 });
 
 userRoute.post("/employee", async (req: Request, res: Response) => {
-  const { user, admin } = req.body;
+  const { user, admin } = req.body || {};
 
   if (!user || !admin) {
     return res
@@ -62,10 +78,26 @@ userRoute.post("/employee", async (req: Request, res: Response) => {
   }
 });
 
-userRoute.put("/employee", async (req: Request, res: Response) => {
-  const { user, admin } = req.body;
+userRoute.post("/:username/card", async (req: Request, res: Response) => {
+  const { username } = req.params;
+  const card: Card | undefined = req.body || {};
 
-  if (!user || !admin || !user.id) {
+  if (!card || !card.CVV) {
+    return res.status(400).send("To add a card you need to send a valid card");
+  }
+
+  const registeredEmployee = await addCard(username, card);
+
+  if (!registeredEmployee) {
+    return res.status(403).send("The seller was not found");
+  }
+  res.json(registeredEmployee);
+});
+
+userRoute.put("/employee", async (req: Request, res: Response) => {
+  const { user, admin } = req.body || {};
+
+  if (!user || !admin) {
     return res
       .status(400)
       .send(

@@ -1,27 +1,92 @@
-import { SaleState } from "e-comm-gt-api";
+import { Sale, SaleState } from "e-comm-gt-api";
 import express, { Request, Response, Router } from "express";
 import {
-  deleteSale,
+  buyShoppingCart,
+  deleteShoppingCart,
   findSaleById,
   findSalesByState,
+  findShoppingCart,
   insertSale,
+  removeProductInCart,
+  updateSale,
+  updateShoppingCartProduct,
 } from "../controllers/sale.controller";
-import { updateSale } from "../controllers/sale.controller";
 
 export const saleRoute: Router = express.Router();
 
 saleRoute.get("/", async (req: Request, res: Response) => {
-  const strState = req.query.state;
+  const strState =
+    typeof req.query.state === "string" ? req.query.state.toUpperCase() : "";
+  const state = SaleState[strState as keyof typeof SaleState];
 
-  if (typeof strState !== "string") {
+  if (!state) {
     return res.status(400).send(`There is no '${strState}' in sale states`);
   }
 
-  const state = SaleState[strState as keyof typeof SaleState];
   const sales = await findSalesByState(state);
 
   res.json(sales);
 });
+
+saleRoute.get(
+  "/:username/shopping-cart",
+  async (req: Request, res: Response) => {
+    const username = req.params.username;
+
+    const sale = await findShoppingCart(username);
+    res.json(sale);
+  }
+);
+
+saleRoute.patch(
+  "/:username/shopping-cart",
+  async (req: Request, res: Response) => {
+    const { username } = req.params;
+    const { product } = req.body || {};
+
+    if (!product && !product.name) {
+      return res.status(400).send("You must send a product object");
+    }
+
+    const updatedSale = await updateShoppingCartProduct(username, product);
+    return res.json(updatedSale);
+  }
+);
+
+saleRoute.put(
+  "/:username/shopping-cart",
+  async (req: Request, res: Response) => {
+    const { username } = req.params;
+    const sale = req.body || {};
+
+    if (!sale || !sale.id) {
+      return res
+        .status(400)
+        .send("You must send a sale object with the its identifier");
+    }
+
+    try {
+      const updatedSale = await buyShoppingCart(username, sale);
+      res.json(updatedSale);
+    } catch (e: any) {
+      res.status(400).send(e.message);
+    }
+  }
+);
+
+saleRoute.delete(
+  "/:username/shopping-cart/:product",
+  async (req: Request, res: Response) => {
+    const { username, product } = { username: "", product: "", ...req.params };
+
+    const shoppingCart = await removeProductInCart(username, product);
+
+    if (!shoppingCart || !("id" in shoppingCart) || !shoppingCart.id) {
+      return res.status(404).send("The shopping cart was not found");
+    }
+    res.json(shoppingCart);
+  }
+);
 
 saleRoute.get("/:id", async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -31,9 +96,9 @@ saleRoute.get("/:id", async (req: Request, res: Response) => {
 });
 
 saleRoute.post("/", async (req: Request, res: Response) => {
-  const sale = req.body;
+  const sale = req.body || {};
 
-  if (!("state" in sale) || !sale.state) {
+  if (!sale || !sale.state) {
     return res.status(400).send("You must send a sale object");
   }
 
@@ -42,9 +107,9 @@ saleRoute.post("/", async (req: Request, res: Response) => {
 });
 
 saleRoute.put("/", async (req: Request, res: Response) => {
-  const sale = req.body;
+  const sale: Sale = req.body || {};
 
-  if (!("id" in sale) || !sale.id) {
+  if (!sale || !sale.id) {
     return res
       .status(400)
       .send("You must send a sale object with the its identifier");
@@ -57,10 +122,11 @@ saleRoute.put("/", async (req: Request, res: Response) => {
 saleRoute.delete("/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const deletedSale = await deleteSale(id);
-
-  if (!deletedSale || !("id" in deletedSale) || !deletedSale.id) {
-    return res.status(404).send("The shopping cart was not found");
+  try {
+    const deletedSale = await deleteShoppingCart(id);
+  } catch (e: any) {
+    console.error(e.message);
   }
-  res.json(deletedSale);
+
+  res.status(204).send();
 });
