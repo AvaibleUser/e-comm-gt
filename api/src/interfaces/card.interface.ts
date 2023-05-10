@@ -1,6 +1,6 @@
 export interface Card {
   cardType: string;
   cardNumber: number;
-  expirationDate: Date;
+  expirationDate: Date | string;
   CVV: number;
 }

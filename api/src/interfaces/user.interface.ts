@@ -7,6 +7,6 @@ export interface User {
   lastname: string;
   username: string;
   password: string;
-  creditCards: Card[];
+  creditCards?: Card[];
   userType: UserType;
 }

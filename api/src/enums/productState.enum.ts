@@ -1,5 +1,5 @@
 export enum ProductState {
-  UNVERFIED = "unverfied",
+  UNVERIFIED = "unverified",
   ONSALE = "onsale",
   REFUSED = "refused",
 }

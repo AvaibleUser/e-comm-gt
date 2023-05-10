@@ -7,12 +7,12 @@ export interface Sale {
   id?: string;
   products: Product[];
   state: SaleState;
-  purchaser: User;
+  purchaser: string;
   card?: Card;
-  delivery?: User;
-  saleDate?: Date;
-  deliveryDate?: Date;
+  delivery?: string;
+  saleDate?: Date | string;
+  deliveryDate?: Date | string;
   selledPrice?: number;
   amount?: number;
-  deadline?: Date;
+  deadline?: Date | string;
 }
