@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Input({
+export default function InputControlled({
   label,
   placeholder,
   value,
@@ -8,7 +8,7 @@ export default function Input({
   type = "text",
 }: any) {
   return (
-    <div className="form-control">
+    <div className="form-control m-2">
       <label className="input-group input-group-vertical">
         <span>{label}</span>
         <input
@@ -20,5 +20,16 @@ export default function Input({
         />
       </label>
     </div>
+  );
+}
+
+export function InputRef({ placeholder, reference, type = "text" }: any) {
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      className="input input-bordered w-xs m-2 flex-1"
+      ref={reference}
+    />
   );
 }
