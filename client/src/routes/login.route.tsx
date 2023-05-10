@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Input from "../components/input.component";
+import InputControlled from "../components/input.component";
 
 import { login, getPathToRedirect, logout } from "../services/login.service";
 
@@ -25,7 +25,7 @@ export default function Login() {
       navigate(getPathToRedirect());
     } catch (e: any) {
       console.error(e);
-      setErrorMsg(e.message);
+      setErrorMsg(e.response.data);
       setTimeout(() => setErrorMsg(""), 2000);
     }
   };
@@ -59,14 +59,13 @@ export default function Login() {
           <></>
         )}
         <div className="card-body flex flex-col">
-          <Input
+          <InputControlled
             label="Nombre de usuario"
             placeholder="rookie"
             value={username}
             setValue={setUsername}
           />
-          <div className="divider"></div>
-          <Input
+          <InputControlled
             label="Contraseña"
             placeholder="qa1234"
             type="password"
