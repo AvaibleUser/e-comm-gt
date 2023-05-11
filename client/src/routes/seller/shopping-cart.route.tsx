@@ -73,15 +73,17 @@ export default function ShoppingCart() {
   const buyCart = async () => {
     try {
       if (!shoppingCart?.id) {
+        return alert("Tiene que agregar productos al carrito de compras");
       }
       let selectedCard: Card | undefined;
       if (
         !cardType.current?.value ||
         !cardNumber.current?.value ||
-        +cardNumber.current.value ||
+        isNaN(+cardNumber.current.value) ||
         !expirationDate.current?.value ||
         isNaN(+new Date(expirationDate.current.value)) ||
-        !cvv.current?.value
+        !cvv.current?.value ||
+        isNaN(+cvv.current?.value)
       ) {
         selectedCard = user.creditCards?.filter(
           (card) => card.cardNumber === +(cardRef.current?.value || 0)
@@ -143,7 +145,7 @@ export default function ShoppingCart() {
       <InputRef placeholder="Numero de la tarjeta" reference={cardNumber} />
       <InputRef placeholder="CVV" reference={cvv} />
       <InputRef
-        date="date"
+        type="date"
         placeholder="Fecha de expiracion"
         reference={expirationDate}
       />

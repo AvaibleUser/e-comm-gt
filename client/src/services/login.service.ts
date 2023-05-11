@@ -38,7 +38,7 @@ export async function signUp(user: User) {
 }
 
 export async function addCardToUser(user: User, card: Card) {
-  const { data } = await axios.put<User>(`${baseUrl}/${user.username}/card`, {
+  const { data } = await axios.post<User>(`${baseUrl}/${user.username}/card`, {
     ...card,
   });
 
